@@ -1,4 +1,4 @@
-// ----全局变量， arr是用于存放jQuery元素的二维数组-----
+// ----全局变量， arr是用于存放<div>元素id的二维数组-----
 arr = [];
 
 // -----初始化 begin---------
@@ -6,7 +6,6 @@ function initElems(){
     for(r = 0; r < 4; r++){
         for (c = 0; c < 4; c++){
             arr[r][c] = '#' + r + c;
-            // 初始化一个display为none的元素，并插入'#elems'父元素中
             var id = r.toString() + c.toString();
             initElem(id);
         }
@@ -14,6 +13,7 @@ function initElems(){
 }
 
 function initElem(id){
+    // 初始化一个display为none的<div>元素，并插入'#elems'父元素中
     var elem = $('<div></div>');
     elem.text(0);
     elem.prop('id', id);
@@ -30,7 +30,7 @@ function generateNewElem(){
     var c = res.col;
     var n = res.num;
     $(arr[r][c]).css(newElemCSS(r, c, n)).text(n);
-    $(arr[r][c]).fadeIn(300);
+    // $(arr[r][c]).fadeIn(10000);
 }
 // -----零元素数组---------
 function getZeros(){
@@ -117,7 +117,7 @@ function doGameOver(){
     alert('重新开始');
 }
 
-// ---------新游戏----------
+// ---------重置游戏----------
 function newGame(){
     if(arr.length == 0) return;
     for(r = 0; r < 4; r++){
@@ -186,12 +186,16 @@ function moveLU(func, array){
 }
 // 4. 移动完后产生新元素
 function movedNewELem(){
-    setTimeout(sleep, 1200);
+    // 禁掉方向按钮的可点击性...
+    $('#right').prop("disabled", "disabled");
+    setTimeout(sleep, 1500);
     function sleep(){
         if(isGameOver()){
             doGameOver();
         }else{
             generateNewElem();
+            // 解禁方向按钮的不可点击性...
+            $('#right').removeAttr("disabled");
         }
     }
 }
@@ -246,6 +250,7 @@ colors = {
         'font': "d0d9db"
     },
 }
+
 
 
 
