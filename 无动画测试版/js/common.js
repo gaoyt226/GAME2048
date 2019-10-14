@@ -62,7 +62,6 @@ function initElem(id){
 // ------游戏的结束 begin-----------
 // -------判断游戏是否结束----------
 function isGameOver(){
-    console.log(getZeros().length);
     if (getZeros().length != 0) return false;
     for(var r = 0; r < 4; r++){
         for(var c= 0; c < 3; c++){
@@ -264,7 +263,6 @@ function matrixArr(source_arr){
 }
 // --------4. 每移动一次后, 判断游戏结束还是继续产生新元素--------
 function newELemORgameOver(){
-    console.log(isGameOver())
     if(isGameOver()){
         doGameOver();
     }else{
