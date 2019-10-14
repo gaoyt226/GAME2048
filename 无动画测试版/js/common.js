@@ -137,6 +137,9 @@ function startGame(){
     initElems();
     generateNewElem();
     generateNewElem();
+
+    console.log('=====开始 start======');
+    printArr();
 }
 // ------游戏的开始和结束 end-----------
 
@@ -187,16 +190,24 @@ function moveLU(func, array){
 // 4. 移动完后产生新元素
 function movedNewELem(){
     // 禁掉方向按钮的可点击性...
-    $('#right').prop("disabled", "disabled");
-    setTimeout(sleep, 1500);
-    function sleep(){
-        if(isGameOver()){
-            doGameOver();
-        }else{
-            generateNewElem();
-            // 解禁方向按钮的不可点击性...
-            $('#right').removeAttr("disabled");
-        }
+    // $('#right').prop("disabled", "disabled");
+    // setTimeout(sleep, 1500);
+    // function sleep(){
+    //     if(isGameOver()){
+    //         doGameOver();
+    //     }else{
+    //         generateNewElem();
+    //         // 解禁方向按钮的不可点击性...
+    //         // $('#right').removeAttr("disabled");
+    //     }
+    // }
+
+    if(isGameOver()){
+        doGameOver();
+    }else{
+        generateNewElem();
+        // 解禁方向按钮的不可点击性...
+        // $('#right').removeAttr("disabled");
     }
 }
 // ---------四个方向移动通用的函数 end-------

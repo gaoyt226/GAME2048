@@ -1,0 +1,18 @@
+#base{
+    margin: 0 auto;
+    padding: 3px;
+    width: 344px;
+    height: 344px;
+    background-color: #eeeacf;
+    border-radius: 5px;
+    overflow: hidden;
+    position: relative;
+}
+#base>#blocks>div{
+    width: 80px;
+    height: 80px;
+    background-color: #62afbe;
+    border-radius: 5px;
+    float: left;
+    margin: 3px;
+}
