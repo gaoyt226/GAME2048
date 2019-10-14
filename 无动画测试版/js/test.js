@@ -1,11 +1,12 @@
-function printArr(){
-    // console.log('----------')
-    for(var m = 0; m < 4; m++){
-        var mm = arr[m];
-        var ll = [];
+// -----纯文字打印, 用于测试-----
+function printArr(description){
+    console.log('======' + description + '=====');
+    for(var r = 0; r < 4; r++){
+        var test = arr[r];
+        var t_line = [];
         for(var j = 0; j < 4; j++){
-            ll[j] = $(mm[j]).text();
+            t_line[j] = $(test[j]).text();
         }
-        console.log(ll);
+        console.log(t_line);
     }
 }

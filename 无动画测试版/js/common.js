@@ -1,6 +1,42 @@
-// ----全局变量， arr是用于存放<div>元素id的二维数组-----
+// -------全局变量 begin--------
+// 用于存放<div>元素id的二维数组
 arr = [];
+// 操作的一行
+line = [];
+// 队列
+queue = [];
+// 未合并过的元素下标
+merged_elem = 3;
+// -------全局变量 end--------
 
+
+// ------游戏的开始 begin-----------
+// -------开始游戏-------
+function startGame(){
+    // 1. 移除已有元素
+    if(arr.length != 0){
+        // 上一次游戏结束, 此时arr是满的
+        for(r = 0; r < 4; r++){
+            for (c = 0; c < 4; c++){
+                // 移除所有可移动元素
+                $(arr[r][c]).remove();
+            }
+        }
+    } // 如果刚打开页面, 此时 arr = [], 什么都不做
+
+    // 2. 初始化
+    arr = [
+        [], [], [], []
+    ];
+    initElems();
+
+    // 3. 随机产生2或4
+    generateNewElem();
+    generateNewElem();
+
+    // 纯文字测试
+    printArr('新游戏');
+}
 // -----初始化 begin---------
 function initElems(){
     for(r = 0; r < 4; r++){
@@ -11,7 +47,6 @@ function initElems(){
         }
     }
 }
-
 function initElem(id){
     // 初始化一个display为none的<div>元素，并插入'#elems'父元素中
     var elem = $('<div></div>');
@@ -21,6 +56,30 @@ function initElem(id){
     $('#elems').append(elem);
 }
 // ------初始化 end----------
+// ------游戏的开始 end-----------
+
+
+// ------游戏的结束 begin-----------
+// -------判断游戏是否结束----------
+function isGameOver(){
+    if (getZeros().length != 0) return false;
+    for(var r = 0; r < 4; r++){
+        for(var c= 0; c < 3; c++){
+            if($(arr[r][c]).text() == $(arr[r][c + 1]).text() || 
+               $(arr[c][r]).text() == $(arr[c + 1][r]).text())
+            {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+// ---------游戏结束做的事情--------
+function doGameOver(){
+    // 提示游戏失败
+    alert('游戏失败');
+}
+// ------游戏的结束 end-----------
 
 
 // --------产生新元素 begin-------
@@ -80,11 +139,9 @@ function newElemCSS(r, c, n){
         'height': '80px',
         'border-radius': '5px',
         'color': '#506776',
-        // d0d9db   506776
         'text-align': 'center',
         'line-height': '80px',
         'fontSize': '36px',
-        // 将display置为block；
         'display': 'block',
         'background-color': bg_color,
         'top': top,
@@ -95,127 +152,128 @@ function newElemCSS(r, c, n){
 }
 // ----------产生新元素 end-----------
 
-// ------游戏的开始和结束 begin-----------
-// -------判断游戏是否结束----------
-function isGameOver(){
-    if (getZeros().length != 0) return false;
-    for(var r = 0; r < 4; r++){
-        for(var c= 0; c < 3; c++){
-            if($(arr[r][c]).text() == $(arr[r][c + 1]).text() || 
-               $(arr[c][r]).text() == $(arr[c + 1][r]).text())
-            {
-                return false;
+
+// ---------四个方向移动需要的函数 begin-------
+// --------1. 单行移动 begin-----------
+function moveTo(direction){
+    // direction: 'r'表示向右, 'l'表示向左, 'd'表示向下, 'u'表示向上.
+
+    // 队列
+    queue = [];
+
+    // 未合并过的元素
+    merged_elem = 3;
+
+    for(var i = 3; i >= 0; i--){
+        var elem = $(line[i]);
+        if (elem.text() == 0){
+            // 将零元素压入队列中
+            queue.push(i);
+        }else{
+            // 如果队列不为空, 则移动元素
+            if(queue.length != 0){
+                // 1. 取出队列中的元素
+                var p = queue.shift();
+
+                // 2. i元素移动到p
+                // 相对定位的位置
+                var r_p = (direction == 'r' || direction == 'd');
+                var position = r_p ? 6 + p * 86 : 6 + (3 - p) * 86;
+                // 相对定位的方向
+                var r_d = (direction == 'r' || direction == 'l');
+                var r_direction = r_d ? 'left' : 'top';
+                // 2.1 动画...
+                // 2.2 交换id
+                var tmp = line[i];
+                line[i] = line[p];
+                line[p] = tmp;               
+
+                // 3.a 如果还要合并
+                if(p < merged_elem && $(line[p]).text() == $(line[p + 1]).text()){
+                    // 合并
+                    merge(p, i);
+                }else{
+                    // 3.b 只移动的话, 交换完id后, 需要将零元素压入队列中
+                    zeroPush(p - 1, i);                 
+                }
+                
+            }else{
+                // 不移动但是可以合并
+                if(i < 3 && $(line[i]).text() == $(line[i + 1]).text()){
+                    // 合并
+                    merge(i, i);
+                }
             }
         }
     }
-    return true;
 }
+// 合并
+function merge(p, i){
+    // 1. 动画: p元素向右合并
+    // 1.1 p元素display:none; text(0);
+    $(line[p]).text(0);
+    // 1.2 (p+1)元素text(double);字体变化;
+    var num = $(line[p + 1]).text() * 2;
+    $(line[p + 1]).text(num);
 
-// ---------游戏结束做的事情--------
-function doGameOver(){
-    // 弹框询问是否继续
-    alert('重新开始');
+    // 2. 将零元素压入队列中
+    zeroPush(p, i);
+
+    // 3. 未合并元素前移
+    merged_elem--;
 }
-
-// ---------重置游戏----------
-function newGame(){
-    if(arr.length == 0) return;
-    for(r = 0; r < 4; r++){
-        for (c = 0; c < 4; c++){
-            $(arr[r][c]).remove();
-        }
+// 移动或合并后操作队列
+function zeroPush(p, i){
+    // 清空队列
+    while(queue.length != 0){
+        queue.shift();
     }
-    arr = [];
-}
-
-// -------开始游戏-------
-function startGame(){
-    newGame();
-    arr = [
-        [], [], [], []
-    ];
-    initElems();
-    generateNewElem();
-    generateNewElem();
-
-    console.log('=====开始 start======');
-    printArr();
-}
-// ------游戏的开始和结束 end-----------
-
-// ---------四个方向移动通用的函数 begin-------
-// 1. 四个方向都要用到的：最靠右的零元素位置
-function zeroPositionR(l){
-    var z = 3;
-    var line = l;
-    while (z >= 0){
-        if ($(line[z]).text() != 0){
-            z--;
-        }else{
-            break;
-        }
+    // 将合并后的零元素压入队列中
+    while(p >= i){
+        queue.push(p);
+        p--;
     }
-    return z;
 }
-
-// 2. 转置
-function matrix_(source, target){
+// -------单行移动 end---------
+// --------2. 反转一行--------
+function reverseLine(source_line){
+    var reverse_line = [];
+    for(var i = 0; i < 4; i++){
+        reverse_line[i] = source_line[i];
+    }
+    for(var j = 3; j >= 0; j--){
+        source_line[3 - j] = reverse_line[j];
+    }   
+}
+// --------3. 转置--------
+function matrixArr(source_arr){
+    var matrix_arr = [];
+    for(var i = 0; i < 4; i++){
+        var matrix_line = []
+        for(var j = 0; j < 4; j++){
+            matrix_line[j] = source_arr[i][j];
+        }
+        matrix_arr[i] = matrix_line;
+    }
     for(var r = 0; r < 4; r++){
         for(var c = 0; c < 4; c++){
-            target[r][c] = source[c][r];
+            source_arr[r][c] = matrix_arr[c][r];
         }
     }
-    return target;
 }
-
-// 3. 向左移动需要对单行进行反转，向上移动中也要用到这一步骤，故封装一个函数，简洁代码
-function moveLU(func, array){
-    for(var i = 0; i< 4; i++){
-        var line = array[i];
-        var reverse = []
-
-        // 反转line中元素的位置
-        for(var j = 3; j >= 0; j--){
-            reverse[3 - j] = line[j];
-        }
-        func(reverse);
-
-        // 将最终的reverse也反转给arr
-        for(var j = 3; j >= 0; j--){
-            line[3 - j] = reverse[j];
-        }
-        array[i] = line;
-    }
-}
-// 4. 移动完后产生新元素
-function movedNewELem(){
-    // 禁掉方向按钮的可点击性...
-    // $('#right').prop("disabled", "disabled");
-    // setTimeout(sleep, 1500);
-    // function sleep(){
-    //     if(isGameOver()){
-    //         doGameOver();
-    //     }else{
-    //         generateNewElem();
-    //         // 解禁方向按钮的不可点击性...
-    //         // $('#right').removeAttr("disabled");
-    //     }
-    // }
-
+// --------4. 每移动一次后, 判断游戏结束还是继续产生新元素--------
+function newELemORgameOver(){
     if(isGameOver()){
         doGameOver();
     }else{
         generateNewElem();
-        // 解禁方向按钮的不可点击性...
-        // $('#right').removeAttr("disabled");
     }
 }
 // ---------四个方向移动通用的函数 end-------
 
+
 // -----全局变量 不同数值的元素颜色--------
 colors = {
-    // '0': '#873738',
-
     '2': {
         'bg': "#c2dcd4",
         'font': "#506776"
@@ -261,14 +319,3 @@ colors = {
         'font': "d0d9db"
     },
 }
-
-
-
-
-
-
-
-
-
-
-
